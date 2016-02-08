@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Layer: de/markiewb/plugins/showlookupcontent/layer.xml
+OpenIDE-Module-Localizing-Bundle: de/markiewb/plugins/showlookupcontent/Bundle.properties
+

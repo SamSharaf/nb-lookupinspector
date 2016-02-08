@@ -1,14 +1,25 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Copyright 2016 markiewb
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package de.markiewb.plugins.showlookupcontent;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.util.Lookup.Result;
@@ -18,19 +29,15 @@ import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
 import org.openide.windows.TopComponent;
 
-/**
- * Top component which displays something.
- */
 @TopComponent.Description(
-    preferredID = "showlookupcontentTopComponent",
-//iconBase="SET/PATH/TO/ICON/HERE", 
-persistenceType = TopComponent.PERSISTENCE_ALWAYS)
+        preferredID = "showlookupcontentTopComponent",
+        persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "output", openAtStartup = false)
-@ActionID(category = "Window", id = "de.markiewb.plugins.showlookupcontent.ShowLookupContentTopComponent")
-@ActionReference(path = "Menu/Window/Other" /*, position = 333 */)
+@ActionID(category = "Window/Debug", id = "de.markiewb.plugins.showlookupcontent.ShowLookupContentTopComponent")
+@ActionReference(path = "Menu/Window/Debug", position = 2000)
 @TopComponent.OpenActionRegistration(
-    displayName = "#CTL_showlookupcontentAction",
-preferredID = "showlookupcontentTopComponent")
+        displayName = "#CTL_showlookupcontentAction",
+        preferredID = "showlookupcontentTopComponent")
 @Messages({
     "CTL_showlookupcontentAction=Lookup content inspector",
     "CTL_showlookupcontentTopComponent=Lookup content inspector",
@@ -38,7 +45,7 @@ preferredID = "showlookupcontentTopComponent")
 })
 public final class ShowLookupContentTopComponent extends TopComponent implements LookupListener {
 
-    public ShowLookupContentTopComponent () {
+    public ShowLookupContentTopComponent() {
         initComponents();
         setName(Bundle.CTL_showlookupcontentTopComponent());
         setToolTipText(Bundle.HINT_showlookupcontentTopComponent());
@@ -47,24 +54,61 @@ public final class ShowLookupContentTopComponent extends TopComponent implements
 
     }
 
+    public void formatRecursive(int depth, final Class<? extends Object> aClass, List<String> list) {
+        if (null == aClass) {
+            return;
+        }
+        // everything is an Object, so do not print
+        if (Object.class.equals(aClass)) {
+            return;
+        }
+        int indent = depth * 8;
+
+        list.add(indent(indent, aClass.toString()));
+
+        Class<? extends Object> superclass = aClass.getSuperclass();
+        if (null != superclass) {
+            formatRecursive(depth + 1, superclass, list);
+        }
+        Class<?>[] interfaces = aClass.getInterfaces();
+        if (null != interfaces && interfaces.length > 0) {
+            for (Class<?> aInterface : interfaces) {
+                formatRecursive(depth + 1, aInterface, list);
+            }
+        }
+    }
+
+    public List<String> getContentFromLookup(Collection<? extends Object> allInstances) {
+        txtLookupContent.setText("# of instances: " + allInstances.size() + "\n");
+        List<String> list = new ArrayList<String>();
+        list.add("");
+        list.add("--Classes in lookup--");
+        for (Object node : allInstances) {
+            final Class<? extends Object> aClass = node.getClass();
+            list.add(String.format("%-70s %s", aClass.toString().trim(), node.toString().trim()));
+        }
+        list.add("");
+        list.add("--Classes in lookup incl. their hierarchy--");
+        for (Object node : allInstances) {
+            final Class<? extends Object> aClass = node.getClass();
+            int depth = 0;
+            formatRecursive(depth, aClass, list);
+        }
+        return list;
+    }
+
     @Override
-    public void resultChanged (LookupEvent ev) {
+    public void resultChanged(LookupEvent ev) {
         Collection<? extends Object> allInstances = lookupResult.allInstances();
-        txtTopComponent.setText(""+TopComponent.getRegistry().getActivated()+"\n");
-        if (TopComponent.getRegistry().getActivated() != this) {
-            txtLookupContent.setText("" + allInstances.size() + "\n");
-            List<String> list = new ArrayList<String>();
-            
-            for (Object node : allInstances) {
-                String text = node.getClass()+":              "+node;
-                list.add(text);
-            }
-            Collections.sort(list);
+        final TopComponent tc = TopComponent.getRegistry().getActivated();
+        txtTopComponent.setText("" + tc + "\n");
+
+        if (tc != this) {
+            List<String> list = getContentFromLookup(allInstances);
             for (String text : list) {
-                txtLookupContent.append(text+ "\n");
+                txtLookupContent.append(text + "\n");
             }
-            
-            
+            txtLookupContent.setCaretPosition(0);
         }
     }
 
@@ -86,12 +130,14 @@ public final class ShowLookupContentTopComponent extends TopComponent implements
         jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
         txtTopComponent.setColumns(20);
+        txtTopComponent.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
         txtTopComponent.setRows(5);
         jScrollPane1.setViewportView(txtTopComponent);
 
         jSplitPane1.setLeftComponent(jScrollPane1);
 
         txtLookupContent.setColumns(20);
+        txtLookupContent.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
         txtLookupContent.setRows(5);
         jScrollPane3.setViewportView(txtLookupContent);
 
@@ -129,27 +175,23 @@ public final class ShowLookupContentTopComponent extends TopComponent implements
     Result<Object> lookupResult;
 
     @Override
-    public void componentOpened () {
+    public void componentOpened() {
 
         lookupResult.addLookupListener(this);
-        // TODO add custom code on component opening
     }
 
     @Override
-    public void componentClosed () {
+    public void componentClosed() {
         lookupResult.removeLookupListener(this);
-        // TODO add custom code on component closing
     }
 
-    void writeProperties (java.util.Properties p) {
-        // better to version settings since initial version as advocated at
-        // http://wiki.apidesign.org/wiki/PropertyFiles
-        p.setProperty("version", "1.0");
-        // TODO store your settings
+    private String indent(int indent, String text) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < indent; i++) {
+            sb.append(" ");
+        }
+        sb.append(text);
+        return sb.toString();
     }
 
-    void readProperties (java.util.Properties p) {
-        String version = p.getProperty("version");
-        // TODO read your settings according to their version
-    }
 }
