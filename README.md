@@ -7,5 +7,5 @@ Adds a window which shows the current lookup content.
 This plugin is also available at http://plugins.netbeans.org/plugin/44971/
 </p>
 <p>
-Compatible to >=NB 7.0.
+Compatible to >=NB 7.0. Apache 2.0 license
 </p>
