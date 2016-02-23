@@ -15,11 +15,17 @@
  */
 package de.markiewb.plugins.showlookupcontent;
 
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
+import org.netbeans.api.editor.EditorRegistry;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.util.Lookup.Result;
@@ -62,9 +68,9 @@ public final class ShowLookupContentTopComponent extends TopComponent implements
         if (Object.class.equals(aClass)) {
             return;
         }
-        int indent = depth * 8;
+        String indentedText = getIndentedText(depth, aClass.toString());
 
-        list.add(indent(indent, aClass.toString()));
+        list.add(indentedText);
 
         Class<? extends Object> superclass = aClass.getSuperclass();
         if (null != superclass) {
@@ -97,6 +103,51 @@ public final class ShowLookupContentTopComponent extends TopComponent implements
         return list;
     }
 
+    public List<String> getDocumentProperties() {
+        List<String> list = new ArrayList<String>();
+        final JTextComponent comp = EditorRegistry.lastFocusedComponent();
+        if (null != comp) {
+            Document document = comp.getDocument();
+            if (null != document) {
+
+                if (document instanceof AbstractDocument) {
+                    AbstractDocument doc = (AbstractDocument) document;
+                    list.add(getIndentedText(0, "--Document--"));
+                    list.add(getIndentedText(1, "" + document));
+                    list.add("");
+
+                    Dictionary<Object, Object> documentProperties = doc.getDocumentProperties();
+                    Enumeration<Object> keys = documentProperties.keys();
+                    //Convert to sorted map
+                    Map<String, String> map = new TreeMap<String, String>();
+                    while (keys.hasMoreElements()) {
+                        Object key = keys.nextElement();
+                        Object value = documentProperties.get(key);
+                        if ("interface java.lang.CharSequence".equals("" + key)) {
+                            value = "DOCUMENT CONTENT WILL NOT BE DISPLAYED";
+                        }
+
+                        map.put("" + key, "" + value);
+                    }
+
+                    for (Map.Entry<String, String> entry : map.entrySet()) {
+                        String key = entry.getKey();
+                        String value = entry.getValue();
+                        list.add(getIndentedText(1, key + "=" + value));
+                    }
+
+                }
+            }
+        }
+        return list;
+    }
+
+    public String getIndentedText(int depth, final String text) {
+        int indent = depth * 8;
+        final String indentedText = indent(indent, text);
+        return indentedText;
+    }
+
     @Override
     public void resultChanged(LookupEvent ev) {
         Collection<? extends Object> allInstances = lookupResult.allInstances();
@@ -104,7 +155,9 @@ public final class ShowLookupContentTopComponent extends TopComponent implements
         txtTopComponent.setText("" + tc + "\n");
 
         if (tc != this) {
-            List<String> list = getContentFromLookup(allInstances);
+            List<String> list = new ArrayList<String>();
+            list.addAll(getContentFromLookup(allInstances));
+            list.addAll(getDocumentProperties());
             for (String text : list) {
                 txtLookupContent.append(text + "\n");
             }
