@@ -4,7 +4,7 @@
 
     <groupId>de.markiewb.netbeans.plugins</groupId>
     <artifactId>nb-lookupinspector</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
     <packaging>nbm</packaging>
 
     <name>Lookup inspector</name>
@@ -61,6 +61,11 @@
             <artifactId>org-netbeans-modules-editor-lib2</artifactId>
             <version>RELEASE80</version>
         </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-text</artifactId>
+            <version>RELEASE80</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -110,6 +115,11 @@
 &lt;/p&gt;
 &lt;p&gt;
 &lt;h2&gt;Updates&lt;/h2&gt;
+&lt;h3&gt;1.3.0:&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;[&lt;a href="https://github.com/markiewb/nb-lookupinspector/issues/6"&gt;Feature&lt;/a&gt;]: Show client properties&lt;/li&gt;
+&lt;li&gt;[&lt;a href="https://github.com/markiewb/nb-lookupinspector/issues/7"&gt;Feature&lt;/a&gt;]: Introduce tab-interface&lt;/li&gt;
+ &lt;/ul&gt;
 &lt;h3&gt;1.2.0:&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;[&lt;a href="https://github.com/markiewb/nb-lookupinspector/issues/5"&gt;Feature&lt;/a&gt;]: Show document properties from javax.swing.text.AbstractDocument&lt;/li&gt;

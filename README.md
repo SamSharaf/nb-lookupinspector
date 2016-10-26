@@ -5,6 +5,15 @@ Adds a window which shows the current lookup content.
 </p>
 <p>
 <h2>Updates</h2>
+<h3>1.3.0:</h3>
+<ul>
+<li>[<a href="https://github.com/markiewb/nb-lookupinspector/issues/6">Feature</a>]: Show client properties</li>
+<li>[<a href="https://github.com/markiewb/nb-lookupinspector/issues/7">Feature</a>]: Introduce tab-interface</li>
+ </ul>
+<h3>1.2.0:</h3>
+<ul>
+<li>[<a href="https://github.com/markiewb/nb-lookupinspector/issues/5">Feature</a>]: Show document properties from javax.swing.text.AbstractDocument</li>
+ </ul>
 <h3>1.1.0:</h3>
 <ul>
 <li>[<a href="https://github.com/markiewb/nb-lookupinspector/issues/2">Bugfix</a>]: Update menu path to Window|Debugging</li>
